@@ -1,0 +1,1 @@
+# REST models created from DB models go here. Attributes (if any) do too
