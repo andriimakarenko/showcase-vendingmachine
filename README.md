@@ -7,4 +7,5 @@ Showcase API of a vending machine
 
 ## How to run
     $> poetry install
+    $> source "$(poetry env info --path)/bin/activate"
     $> scripts/start.sh
