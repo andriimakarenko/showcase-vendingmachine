@@ -9,3 +9,6 @@ Showcase API of a vending machine
     $> poetry install
     $> source "$(poetry env info --path)/bin/activate"
     $> scripts/start.sh
+
+## Swagger
+Swagger API is available at `{base_url}/api`
