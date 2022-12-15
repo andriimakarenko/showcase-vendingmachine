@@ -173,7 +173,7 @@ def vuild_model_from_db_model(api, model_class, model_name=None, overrides=None)
         property_type = property_map.get(field_type)
 
         if property_type is None:
-            logging.error(f"Unexpected ndb field type {type(field)}")
+            logging.error(f"Unexpected db field type {field_type}")
             property_type = fields.String
 
         # Ignore model fields that were explicitly specified in overrides.
