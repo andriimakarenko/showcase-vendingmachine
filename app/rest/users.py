@@ -114,17 +114,17 @@ class LogInUser(Resource):
 #     return make_response('Could not log in',  401, {'Authentication': 'Login or password incorrect'})
 
 
-@api.route('/all_users', methods=['GET'])
-def get_all_users(): 
- 
-   users = User.query.all()
-   result = []  
-   for user in users:  
-       user_data = {}  
-       user_data['public_id'] = user.public_id 
-       user_data['name'] = user.name
-       user_data['password'] = user.password
-       user_data['admin'] = user.admin
-     
-       result.append(user_data)  
-   return jsonify({'users': result})
+@api.route('/all_users')
+class GetAllUsers():
+    def get(self):    
+        users = User.query.all()
+        result = []  
+        for user in users:  
+            user_data = {}  
+            user_data['public_id'] = user.public_id 
+            user_data['name'] = user.name
+            user_data['password'] = user.password
+            user_data['admin'] = user.admin
+
+            result.append(user_data)  
+        return jsonify({'users': result})
