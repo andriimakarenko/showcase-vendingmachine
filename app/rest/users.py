@@ -6,8 +6,9 @@ from flask import jsonify, request, make_response
 from flask_restx import Namespace, Resource, fields
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import Form, StringField, PasswordField, validators
+from sqlalchemy import select
 
-from app.models import User
+from app.models import User, Role
 from database import db
 from app.errors import Errors, ErrorsForHumans
 from app.auth.jwt_auth import generate_custom_auth_token
@@ -55,14 +56,27 @@ login_response_model = api.model("LoginResponseModel", {
 
 @api.route('')
 class CreateUser(Resource):
-    def post(self): 
+    # @api.expect(user_payload) don't have time for this but I would do this in real project
+    @api.doc(security=None)
+    @api.marshal_with(user_model)
+    def post(self):
         data = request.get_json() 
         hashed_password = generate_password_hash(data['password'], method='sha256')
         
-        new_user = User(public_id=str(uuid.uuid4()), name=data['name'], password=hashed_password, admin=False)
-        db.session.add(new_user) 
-        db.session.commit()   
-        return jsonify({'message': 'registered successfully'})
+        user = User(
+            id=str(uuid.uuid4()),
+            username=data['username'],
+            password=hashed_password,
+            balance=0,
+            role=select(Role).where(Role.title == data['role'])
+        )
+        db.session.add(user)
+        db.session.commit()
+        token = generate_custom_auth_token(user.id)
+        return {
+            "user": user,
+            "token": token,
+        }, 201
 
 
 @api.route("")
@@ -90,7 +104,7 @@ class LogInUser(Resource):
             }, 400
 
         return {
-            "token": generate_custom_auth_token(user.key.id()),
+            "token": generate_custom_auth_token(user.id),
             "user": user,
         }, 200
 
