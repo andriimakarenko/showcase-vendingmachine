@@ -115,7 +115,7 @@ class LogInUser(Resource):
 
 
 @api.route('/all_users')
-class GetAllUsers():
+class GetAllUsers(Resource):
     def get(self):    
         users = User.query.all()
         result = []  
