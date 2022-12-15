@@ -2,14 +2,15 @@ import logging
 from flask import request
 from flask_restx import Model, Namespace, fields
 # from flask_restx import fields as flask_fields, Resource, ValidationError
-from keys import API_KEYS
+from app.keys import API_KEYS
 from wtforms import Form, fields as wtforms_fields
 # from wtforms.validators import Length as LengthValidator
 from functools import wraps
 
-import models
-from auth.jwt_auth import get_custom_auth_token_from_request, get_user_id_from_custom_token
-from errors import Errors, ErrorsForHumans
+from app.models import User
+from app.auth.jwt_auth import get_custom_auth_token_from_request, get_user_id_from_custom_token
+from app.errors import Errors, ErrorsForHumans
+from database import db
 
 
 class AuthError(Exception):
@@ -25,6 +26,11 @@ class APIError(Exception):
         self.errors = errors
 
 
+def get_id(entity):
+    """Get ID from an entity"""
+    return (entity.id if isinstance(entity, db.Model) else entity["id"]) or 0
+
+
 def get_logged_in_user(token):
     """Try to get the logged in user or throw"""
     if not token:
@@ -33,7 +39,7 @@ def get_logged_in_user(token):
     if not user_id:
         raise AuthError(Errors.INVALID_TOKEN)
 
-    user = models.User.get_by_id(user_id)
+    user = User.get_by_id(user_id)
     if not user:
         raise AuthError(Errors.INVALID_TOKEN)
     return user
@@ -142,10 +148,10 @@ def make_form_errors_model(api, form_class, model_name=None, remap=None):
     model_fields = {}
     for field in form_class():
         field_name = remap.get(field.name, field.name)
-        model_fields[field_name] = fields.List(ields.String(), allow_null=True)
+        model_fields[field_name] = fields.List(fields.String(), allow_null=True)
     model_fields = {
         key: value
-        for key, value in model_fields.iteritems()
+        for key, value in model_fields.items()
         if value is not None
     }
     return api.model(model_name, model_fields)
@@ -154,4 +160,6 @@ def make_form_errors_model(api, form_class, model_name=None, remap=None):
 def make_model(api, cls, name=None, overrides=None):
     if issubclass(cls, Form):
         return make_model_from_form(api, cls, name, overrides)
+    if issubclass(cls, db.Model):
+        return cls
     raise TypeError("Unexpected type: {0}".format(cls.__name__))
