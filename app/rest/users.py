@@ -1,18 +1,17 @@
 import jwt
 import datetime
 import uuid
-import keys
 import re
 from flask import jsonify, request, make_response
 from flask_restx import Namespace, Resource, fields
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import Form, StringField, PasswordField, validators
 
-from models import User
+from app.models import User
 from database import db
-from errors import Errors, ErrorsForHumans
-from auth.jwt_auth import generate_custom_auth_token
-from rest.utils import make_model, make_model_from_form, make_form_errors_model
+from app.errors import Errors, ErrorsForHumans
+from app.auth.jwt_auth import generate_custom_auth_token
+from app.rest.utils import make_model, make_model_from_form, make_form_errors_model
 
 
 api = Namespace('user', path='/user')
@@ -44,7 +43,7 @@ class LoginForm(Form):
     password = password_field
 
 
-user_model = make_model(api, User, "UserMeModel")
+user_model = make_model(api, User, "UserModel")
 login_form_errors = make_form_errors_model(api, LoginForm)
 login_response_model = api.model("LoginResponseModel", {
     "user": fields.Nested(user_model, allow_null=True),
