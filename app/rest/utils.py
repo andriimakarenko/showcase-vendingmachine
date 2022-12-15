@@ -157,9 +157,47 @@ def make_form_errors_model(api, form_class, model_name=None, remap=None):
     return api.model(model_name, model_fields)
 
 
+def vuild_model_from_db_model(api, model_class, model_name=None, overrides=None):
+    property_map = {
+        db.Float: fields.Float,
+        db.Integer: fields.Integer,
+        db.String: fields.String,
+    }
+    model_fields = overrides.copy() if overrides else {}
+    if "id" not in model_fields:
+        model_fields["id"] = fields.Integer(required=True, attribute=get_id)
+
+    for field in model_class.__table__.columns.values():
+        field_name = field.name
+        field_type = field.type
+        property_type = property_map.get(field_type)
+
+        if property_type is None:
+            logging.error(f"Unexpected ndb field type {type(field)}")
+            property_type = fields.String
+
+        # Ignore model fields that were explicitly specified in overrides.
+        if field_name in model_fields:
+            if model_fields[field_name] is None:
+                continue
+
+        model_fields[field_name] = property_type
+    # Remove any fields that are explicitly set to None
+    return {
+        field_name: value
+        for field_name, value in model_fields.items()
+        if value is not None
+    }
+
+
+def make_model_from_db_model(api, model_class, model_name=None, overrides=None):
+    model_fields = vuild_model_from_db_model(api, model_class, overrides)
+    return api.model(model_name or model_class.__name__, model_fields)
+
+
 def make_model(api, cls, name=None, overrides=None):
     if issubclass(cls, Form):
         return make_model_from_form(api, cls, name, overrides)
     if issubclass(cls, db.Model):
-        return cls
+        return make_model_from_db_model(api, cls, name, overrides)
     raise TypeError("Unexpected type: {0}".format(cls.__name__))
