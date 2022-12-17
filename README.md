@@ -8,7 +8,9 @@ Showcase API of a vending machine
 ## How to run
     $> poetry install
     $> source "$(poetry env info --path)/bin/activate"
-    $> scripts/start.sh
+    $> FLASK_DEBUG=1 scripts/start.sh
+
+`FLASK_DEBUG=1` is needed to be able to log in with Swagger
 
 ## Swagger
 Swagger API is available at `{base_url}/api`
