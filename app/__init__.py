@@ -42,18 +42,24 @@ def create_app():
         vendor_id = models.Role.query.filter_by(title='vendor').first().id
         buyer_id = models.Role.query.filter_by(title='buyer').first().id
 
-        the_vendor = models.User(username='MrVendor', # This below is a SHA256 of the word 'password'
-                                password='sha256$Oi393u9gAIBibnzM$d575b373c5b8d037bb404ba828fe0e32322a80b4ddeccdd741ec92621e8378cf',
-                                balance=0,
-                                role_id=vendor_id)
-        rich_buyer = models.User(username='MrBuyer',
-                                password='sha256$Oi393u9gAIBibnzM$d575b373c5b8d037bb404ba828fe0e32322a80b4ddeccdd741ec92621e8378cf',
-                                balance=100500,
-                                role_id=buyer_id)
-        broke_buyer = models.User(username='MrBeggar',
-                                password='sha256$Oi393u9gAIBibnzM$d575b373c5b8d037bb404ba828fe0e32322a80b4ddeccdd741ec92621e8378cf',
-                                balance=0,
-                                role_id=buyer_id)
+        the_vendor = models.User(
+            username='MrVendor', # This below is a SHA256 of the word 'password'
+            password='sha256$Oi393u9gAIBibnzM$d575b373c5b8d037bb404ba828fe0e32322a80b4ddeccdd741ec92621e8378cf',
+            balance=0,
+            role_id=vendor_id
+        )
+        rich_buyer = models.User(
+            username='MrBuyer',
+            password='sha256$Oi393u9gAIBibnzM$d575b373c5b8d037bb404ba828fe0e32322a80b4ddeccdd741ec92621e8378cf',
+            balance=100500,
+            role_id=buyer_id
+        )
+        broke_buyer = models.User(
+            username='MrBeggar',
+            password='sha256$Oi393u9gAIBibnzM$d575b373c5b8d037bb404ba828fe0e32322a80b4ddeccdd741ec92621e8378cf',
+            balance=0,
+            role_id=buyer_id
+        )
         db.session.add_all([the_vendor, rich_buyer, broke_buyer])
         db.session.commit()
         print('Database seeded')
