@@ -12,6 +12,9 @@ class Role(db.Model):
     title = db.Column(db.String(20))
     users = db.relationship('User', backref='roles')
 
+    def __repr__(self) -> str:
+        return f'<id: {self.id}, title: {self.title}>'
+
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -19,3 +22,6 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(80))
     balance = db.Column(db.Integer)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+
+    def __repr__(self) -> str:
+        return f'<username: {self.username}, balance: {self.balance}, role_id: {self.role_id}>'
