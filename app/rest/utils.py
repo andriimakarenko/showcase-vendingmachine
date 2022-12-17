@@ -26,6 +26,17 @@ class APIError(Exception):
         self.errors = errors
 
 
+def conditional_decorator(decorator, condition, *args):
+
+    def wrapper(function):
+        if condition:
+            return decorator(function)
+        else:
+            return function
+
+    return wrapper
+
+
 def get_id(entity):
     """Get ID from an entity"""
     return (entity.id if isinstance(entity, db.Model) else entity["id"]) or 0
@@ -117,7 +128,7 @@ def make_model_from_form(api, form_class, name=None, overrides=None):
     # Remove any fields that are explicitly set to None
     model_fields = {
         name: value
-        for name, value in model_fields.iteritems()
+        for name, value in model_fields.items()
         if value is not None
     }
     return api.model(name or form_class.__name__, model_fields)
