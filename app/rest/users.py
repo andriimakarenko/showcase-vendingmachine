@@ -2,17 +2,21 @@ import jwt
 import datetime
 import uuid
 import re
+import os
 from flask import jsonify, request, make_response
 from flask_restx import Namespace, Resource, fields
 from werkzeug.security import generate_password_hash, check_password_hash
-from wtforms import Form, StringField, PasswordField, validators
+from wtforms import Form, StringField, PasswordField, RadioField, validators
 from sqlalchemy import select
 
 from app.models import User, Role
 from database import db
 from app.errors import Errors, ErrorsForHumans
 from app.auth.jwt_auth import generate_custom_auth_token
-from app.rest.utils import make_model, make_model_from_form, make_form_errors_model
+from app.rest.utils import (
+    make_model, make_model_from_form, make_form_errors_model,
+    login_optional, login_required, conditional_decorator
+)
 
 
 api = Namespace('user', path='/user')
@@ -38,6 +42,16 @@ password_field = PasswordField('Password', [
     validators.InputRequired(message=Errors.REQUIRED_FIELD),
 ])
 
+status_field = RadioField(
+    'Status',
+    choices=[('vendor', 'Vendor'), ('buyer', 'Buyer')],
+)
+
+
+class SignUpForm(Form):
+    username = username_field
+    password = password_field
+    status = status_field
 
 class LoginForm(Form):
     username = username_field
@@ -45,6 +59,8 @@ class LoginForm(Form):
 
 
 user_model = make_model(api, User, "UserModel")
+sign_up_payload = make_model(api, SignUpForm)
+log_in_payload = make_model(api, LoginForm)
 login_form_errors = make_form_errors_model(api, LoginForm)
 login_response_model = api.model("LoginResponseModel", {
     "user": fields.Nested(user_model, allow_null=True),
@@ -56,7 +72,7 @@ login_response_model = api.model("LoginResponseModel", {
 
 @api.route('')
 class CreateUser(Resource):
-    # @api.expect(user_payload) don't have time for this but I would do this in real project
+    @api.expect(sign_up_payload)
     @api.doc(security=None)
     @api.marshal_with(user_model)
     def post(self):
@@ -64,11 +80,10 @@ class CreateUser(Resource):
         hashed_password = generate_password_hash(data['password'], method='sha256')
         
         user = User(
-            id=str(uuid.uuid4()),
             username=data['username'],
             password=hashed_password,
             balance=0,
-            role=select(Role).where(Role.title == data['role'])
+            role_id=Role.query.filter_by(title=f'{data["role"]}').first().id
         )
         db.session.add(user)
         db.session.commit()
@@ -79,14 +94,17 @@ class CreateUser(Resource):
         }, 201
 
 
-@api.route("")
+@api.route('/login')
 class LogInUser(Resource):
+    @conditional_decorator(api.expect(log_in_payload), os.environ.get('FLASK_DEBUG'))
     @api.doc(security=None)
     @api.marshal_with(login_response_model)
     def post(self):
-        """Validate a user's login details and return an auth token on success.
-
-        Note that we deliberately do *not* use @expect on this method since that causes password leakage in errors.
+        """
+        Validate a user's login details and return an auth token on success.
+        Note that I only use @except on this method in development environment, not in production.
+        That is because it leaks passwords in error messages, which is not acceptibel in production.
+        Yet without this expect you can't test the method with Swagger.
         """
         form = LoginForm.from_json(api.payload)
 
@@ -108,29 +126,11 @@ class LogInUser(Resource):
             "user": user,
         }, 200
 
-# This is some stupid boilerplate code from Internet that I hoped would work but it doesn't
-# @api.route('/login', methods=['POST']) 
-# def login_user():
-#     auth = request.authorization  
-#     if not auth or not auth.username or not auth.password: 
-#        return make_response('Could not log in', 401, {'Authentication': 'Login and passwod required"'})   
- 
-#     user = User.query.filter_by(name=auth.username).first()  
-#     if check_password_hash(user.password, auth.password):
-#         token = jwt.encode({
-#                 'public_id' : user.public_id,
-#                 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=45)
-#             }, keys.API_KEYS['secret_key'], "HS256"
-#         )
- 
-#         return jsonify({'token' : token})
- 
-#     return make_response('Could not log in',  401, {'Authentication': 'Login or password incorrect'})
-
 
 @api.route('/all_users')
 class GetAllUsers(Resource):
-    def get(self):    
+    @login_required
+    def get(self):
         users = User.query.all()
         result = []  
         for user in users:  
