@@ -42,8 +42,8 @@ password_field = PasswordField('Password', [
     validators.InputRequired(message=Errors.REQUIRED_FIELD),
 ])
 
-status_field = RadioField(
-    'Status',
+role_field = RadioField(
+    'User role',
     choices=[('vendor', 'Vendor'), ('buyer', 'Buyer')],
 )
 
@@ -51,7 +51,7 @@ status_field = RadioField(
 class SignUpForm(Form):
     username = username_field
     password = password_field
-    status = status_field
+    role = role_field
 
 class LoginForm(Form):
     username = username_field
@@ -59,7 +59,16 @@ class LoginForm(Form):
 
 # TODO: Add user model with password cut out and return that instead of user_model
 user_model = make_model(api, User, "UserModel")
+
 sign_up_payload = make_model(api, SignUpForm)
+sign_up_form_errors = make_form_errors_model(api, SignUpForm)
+sign_up_response_model = api.model("SignUpResponseModel", {
+    "user": fields.Nested(user_model, allow_null=True),
+    "token": fields.String(allow_null=True),
+    "errors": fields.Raw(),
+    "form_errors": fields.Nested(sign_up_form_errors, allow_null=True, skip_none=True),
+})
+
 log_in_payload = make_model(api, LoginForm)
 login_form_errors = make_form_errors_model(api, LoginForm)
 login_response_model = api.model("LoginResponseModel", {
@@ -71,14 +80,23 @@ login_response_model = api.model("LoginResponseModel", {
 
 
 @api.route('')
-class CreateUser(Resource):
+class SignUpUser(Resource):
     @api.expect(sign_up_payload)
     @api.doc(security=None)
-    @api.marshal_with(user_model)
+    @api.marshal_with(sign_up_response_model)
     def post(self):
         data = request.get_json() 
         hashed_password = generate_password_hash(data['password'], method='sha256')
         
+        user = User.query.filter(func.lower(User.username) == func.lower(data["username"])).first()
+
+        if user:
+            return {
+                "form_errors": {
+                    "username": [Errors.USERNAME_TAKEN]
+                }
+            }, 400
+
         user = User(
             username=data['username'],
             password=hashed_password,
