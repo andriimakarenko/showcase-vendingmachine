@@ -56,19 +56,19 @@ def get_logged_in_user(token):
     return user
 
 
-def login_optional(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        try:
-            token = get_custom_auth_token_from_request(request)
-            user = get_logged_in_user(token)
-            request.user_id = user.id
-            request.user = user
-        except AuthError:
-            request.user_id = None
-            request.user = None
-        return f(*args, **kwargs)
-    return wrapper
+# def login_optional(f):
+#     @wraps(f)
+#     def wrapper(*args, **kwargs):
+#         try:
+#             token = get_custom_auth_token_from_request(request)
+#             user = get_logged_in_user(token)
+#             request.user_id = user.id
+#             request.user = user
+#         except AuthError:
+#             request.user_id = None
+#             request.user = None
+#         return f(*args, **kwargs)
+#     return wrapper
 
 
 def login_required(f):

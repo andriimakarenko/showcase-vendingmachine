@@ -15,7 +15,7 @@ from app.errors import Errors, ErrorsForHumans
 from app.auth.jwt_auth import generate_custom_auth_token
 from app.rest.utils import (
     make_model, make_model_from_form, make_form_errors_model,
-    login_optional, login_required, conditional_decorator
+    login_required, conditional_decorator
 )
 
 
