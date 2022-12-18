@@ -50,7 +50,7 @@ def get_logged_in_user(token):
     if not user_id:
         raise AuthError(Errors.INVALID_TOKEN)
 
-    user = User.get_by_id(user_id)
+    user = User.query.get(user_id)
     if not user:
         raise AuthError(Errors.INVALID_TOKEN)
     return user
@@ -62,7 +62,7 @@ def login_optional(f):
         try:
             token = get_custom_auth_token_from_request(request)
             user = get_logged_in_user(token)
-            request.user_id = user.key.id()
+            request.user_id = user.id
             request.user = user
         except AuthError:
             request.user_id = None
@@ -77,7 +77,7 @@ def login_required(f):
         try:
             token = get_custom_auth_token_from_request(request)
             user = get_logged_in_user(token)
-            request.user_id = user.key.id()
+            request.user_id = user.id
             request.user = user
         except AuthError as e:
             return {"errors": [str(e)]}, 403

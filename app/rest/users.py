@@ -7,7 +7,7 @@ from flask import jsonify, request, make_response
 from flask_restx import Namespace, Resource, fields
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import Form, StringField, PasswordField, RadioField, validators
-from sqlalchemy import select
+from sqlalchemy import func
 
 from app.models import User, Role
 from database import db
@@ -57,7 +57,7 @@ class LoginForm(Form):
     username = username_field
     password = password_field
 
-
+# TODO: Add user model with password cut out and return that instead of user_model
 user_model = make_model(api, User, "UserModel")
 sign_up_payload = make_model(api, SignUpForm)
 log_in_payload = make_model(api, LoginForm)
@@ -108,15 +108,15 @@ class LogInUser(Resource):
         """
         form = LoginForm.from_json(api.payload)
 
-        user = User.query(User.username == form.data["login_id"].lower()).get()
+        user = User.query.filter(func.lower(User.username) == func.lower(form.data["username"])).first()
 
         if (
             not user or
-            not check_password_hash(form.data["password"], user.password)
+            not check_password_hash(user.password, form.data["password"])
         ):
             return {
                 "form_errors": {
-                    "login_id": [Errors.INVALID_LOGIN],
+                    "username": [Errors.INVALID_LOGIN],
                     "password": [Errors.INVALID_LOGIN]
                 }
             }, 400
@@ -127,7 +127,8 @@ class LogInUser(Resource):
         }, 200
 
 
-@api.route('/all_users')
+# Only enable this endpoint in DEV env. It's clearly unsecure to give out in PROD
+@conditional_decorator(api.route('/all_users'), os.environ.get('FLASK_DEBUG'))
 class GetAllUsers(Resource):
     @login_required
     def get(self):
@@ -135,10 +136,9 @@ class GetAllUsers(Resource):
         result = []  
         for user in users:  
             user_data = {}  
-            user_data['public_id'] = user.public_id 
-            user_data['name'] = user.name
-            user_data['password'] = user.password
-            user_data['admin'] = user.admin
+            user_data['id'] = user.id 
+            user_data['username'] = user.username
+            user_data['role'] = Role.query.get(user.role_id).title
 
             result.append(user_data)  
         return jsonify({'users': result})
