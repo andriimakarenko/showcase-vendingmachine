@@ -16,7 +16,7 @@ from tests.utils import UserFactory, RoleFactory
 
 
 @pytest.fixture(scope='module')
-def test_client():
+def client():
     flask_app = create_app()
     flask_app.config.from_object('config.TestingConfig')
 
