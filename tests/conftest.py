@@ -1,8 +1,8 @@
 """This file is automatically used by pytest to discover global fixtures."""
 import pytest
-from app.auth.jwt_auth import generate_custom_token
+from app.auth.jwt_auth import generate_custom_auth_token
 
-from utils import UserFactory, RoleFactory
+from tests.utils import UserFactory, RoleFactory
 
 
 # @pytest.fixture
@@ -26,19 +26,19 @@ def buyer_role():
 @pytest.fixture()
 def user():
     test_user = UserFactory.create()
-    token = generate_custom_token(test_user.id)
+    token = generate_custom_auth_token(test_user.id)
     yield test_user, token
 
 
 @pytest.fixture()
 def vendor():
     test_user = UserFactory.create(role='vendor')
-    token = generate_custom_token(test_user.id)
+    token = generate_custom_auth_token(test_user.id)
     yield test_user, token
 
 
 @pytest.fixture()
 def buyer():
     test_user = UserFactory.create(role='buyer')
-    token = generate_custom_token(test_user.id)
+    token = generate_custom_auth_token(test_user.id)
     yield test_user, token
