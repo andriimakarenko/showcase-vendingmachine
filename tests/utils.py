@@ -11,9 +11,12 @@ FAKE_USER_DATA = {
 
 class UserFactory(object):
     @classmethod
-    def create(cls, username=None, password=None, balance=None, role=None, role_id=None):
+    def create(cls, id=None, username=None, password=None, balance=None, role=None, role_id=None):
 
         data = FAKE_USER_DATA.copy()
+        if id is not None:
+            data['id'] = id
+
         if username is None:
             data['username'] = cls.generate_unique_username(data['username'])
         else:
@@ -31,6 +34,7 @@ class UserFactory(object):
             data['role_id'] = models.Role.query.filter_by(title=role).first().id
 
         user = models.User(
+            id=data['id'],
             username=data['username'].lower(),
             password=generate_password_hash(data['password'], method='sha256'),
             balance=data['balance'],
