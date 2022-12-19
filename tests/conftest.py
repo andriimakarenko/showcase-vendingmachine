@@ -87,13 +87,13 @@ def user():
 
 @pytest.fixture()
 def vendor():
-    test_user = UserFactory.create(role='vendor')
+    test_user = UserFactory.create(id=1, role='vendor')
     token = generate_custom_auth_token(test_user.id)
     yield test_user, token
 
 
 @pytest.fixture()
 def buyer():
-    test_user = UserFactory.create(role='buyer')
+    test_user = UserFactory.create(id=2, role='buyer')
     token = generate_custom_auth_token(test_user.id)
     yield test_user, token
