@@ -1,5 +1,9 @@
 from app import models
 
+###########
+#  ROLES  #
+###########
+
 def test_create_role():
     """
     GIVEN a Role model
@@ -10,6 +14,10 @@ def test_create_role():
     role = models.Role(title='vendor')
     assert role.title == 'vendor'
 
+
+###########
+#  USERS  #
+###########
 
 def test_create_vendor(vendor_role):
     """
@@ -48,3 +56,4 @@ def test_create_buyer(buyer_role):
     assert user.password == 'testpassword'
     assert user.balance == 1337
     assert user.role_id == buyer_role.id
+
