@@ -69,6 +69,9 @@ def test_create_product(client, vendor_role, vendor):
     THEN its custom details are saved correctly
     """
 
+    # The fixture vendor returns a tuple, we need the 1st item from it
+    vendor = vendor[0]
+
     product = models.Product(
         product_name='Mitsubishi Eclipse 1G GSX',
         amount_available=42,
