@@ -3,15 +3,16 @@ from werkzeug.security import generate_password_hash
 import app.models as models
 
 FAKE_USER_DATA = {
-    'username': u'validuser',
-    'password': u'password',
+    'username': 'validuser',
+    'password': generate_password_hash('password', method='sha256'),
     'balance': '0',
-    'role': 'buyer'
+    'role_id': '0'
 }
 
 class UserFactory(object):
     @classmethod
-    def create(cls, username=None, password=None, balance=None, role=None):
+    def create(cls, username=None, password=None, balance=None, role=None, role_id=None):
+
         data = FAKE_USER_DATA.copy()
         if username is None:
             data['username'] = cls.generate_unique_username(data['username'])
@@ -23,15 +24,17 @@ class UserFactory(object):
 
         if balance is not None:
             data['balance'] = balance
-        
-        if role is not None:
-            data['role'] = role
+
+        if role_id is not None:
+            data['role_id'] = role_id
+        elif role is not None:
+            data['role_id'] = models.Role.query.filter_by(title=role).first().id
 
         user = models.User(
             username=data['username'].lower(),
             password=generate_password_hash(data['password'], method='sha256'),
             balance=data['balance'],
-            role_id=models.Role.query.filter_by(title=f'{data["role"]}').first().id
+            role_id=data['role_id']
         )
 
         return user
@@ -41,7 +44,7 @@ class UserFactory(object):
         unique_username = username
         increment = 0
 
-        while models.User.query.filter_by(username=unique_username):
+        while models.User.query.filter_by(username=unique_username).first():
             increment += 1
             unique_username = f"{username}{increment}"
 
@@ -52,10 +55,14 @@ FAKE_ROLE_DATA = {'title': 'buyer'}
 
 class RoleFactory(object):
     @classmethod
-    def create(cls, title=None):
+    def create(cls, id=None, title=None):
         data = FAKE_ROLE_DATA.copy()
+
+        if id is not None:
+            data['id'] = id
+
         if title is not None:
             data['title'] = title
 
-        role = models.Role(title=data['title'])
+        role = models.Role(id=data['id'], title=data['title'])
         return role
