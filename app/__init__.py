@@ -6,13 +6,15 @@ from sqlalchemy import select
 from . import models
 from . import keys
 from . import auth
+from config import Config
 from database import db, DB_NAME
 from app.rest import rest_blueprint
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = keys.API_KEYS['secret_key']
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    # app.config['SECRET_KEY'] = keys.API_KEYS['secret_key']
+    # app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    app.config.from_object(Config)
     db.init_app(app)
 
     with app.app_context():
