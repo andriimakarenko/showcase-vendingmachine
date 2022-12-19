@@ -57,3 +57,26 @@ def test_create_buyer(buyer_role):
     assert user.balance == 1337
     assert user.role_id == buyer_role.id
 
+
+##############
+#  PRODUCTS  #
+##############
+
+def test_create_product(client, vendor_role, vendor):
+    """
+    GIVEN a Product model
+    WHEN a Product entity is instantiated
+    THEN its custom details are saved correctly
+    """
+
+    product = models.Product(
+        product_name='Mitsubishi Eclipse 1G GSX',
+        amount_available=42,
+        cost=23300,
+        seller_id=vendor.id
+    )
+
+    assert product.product_name == 'Mitsubishi Eclipse 1G GSX'
+    assert product.amount_available == 42
+    assert product.cost == 23300
+    assert product.seller_id == vendor.id
