@@ -10,6 +10,7 @@ class Errors(object):
     REQUIRED_FIELD = "REQUIRED_FIELD"
     INVALID_LOGIN = "INVALID_LOGIN"
     USERNAME_TAKEN = "USERNAME_TAKEN"
+    MISSING_TOKEN = "MISSING_TOKEN"
 
 
 class ErrorsForHumans(object):
@@ -21,3 +22,4 @@ class ErrorsForHumans(object):
     REQUIRED_FIELD = "This field is required"
     INVALID_LOGIN = "Your login or password was incorrect, please tyr again"
     USERNAME_TAKEN = "Sorry but this username is already taken"
+    MISSING_TOKEN = "Sorry, your request needs a token"
