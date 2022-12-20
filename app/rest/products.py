@@ -56,15 +56,21 @@ buy_payload = make_model(api, BuyForm)
 buy_form_errors = make_form_errors_model(api, BuyForm)
 buy_response_model = api.model("BuyResponse", {
     "product": fields.Nested(product_model),
+    "amount_purchased": fields.Integer(),
+    "transaction_amount": fields.Integer(),
     "errors": fields.Raw(),
     "form_errors": fields.Nested(buy_form_errors, allow_null=True, skip_none=True),
 })
 
+product_details_model = api.model("ProductDetails", {
+    "product": fields.Nested(product_model),
+    "errors": fields.Raw(),
+    "form_errors": fields.Nested(buy_form_errors, allow_null=True, skip_none=True),
+})
 
 @api.route('')
 class AddProduct(Resource):
     @api.expect(add_product_payload)
-    @api.doc(security=None)
     @api.marshal_with(add_product_response_model)
     @login_required
     def post(self):
@@ -95,19 +101,19 @@ class AddProduct(Resource):
 
 @api.route('/<int:product_id>')
 class ProductDetails(Resource):
-    @api.marshal_with(buy_response_model)
+    @api.marshal_with(product_details_model)
     def get(self, product_id):
         product = User.query.get(product_id)
         if product is None:
             return {
                 "errors": [Errors.WRONG_PRODUCT_ID]
-            }
+            }, 404
         return {
             "product": product
         }, 200
     
     @login_required
-    @api.marshal_with(buy_response_model)
+    @api.marshal_with(product_details_model)
     def patch(self, product_id):
         if not request.headers or 'Authorization' not in request.headers:
             return {
@@ -117,7 +123,7 @@ class ProductDetails(Resource):
         if product is None:
             return {
                 "errors": [Errors.WRONG_PRODUCT_ID]
-            }
+            }, 404
 
         owner_id = product.seller_id
         token = get_custom_auth_token_from_request(request)
@@ -153,7 +159,7 @@ class ProductDetails(Resource):
         if product is None:
             return {
                 "errors": [Errors.WRONG_PRODUCT_ID]
-            }
+            }, 404
 
         owner_id = product.seller_id
         token = get_custom_auth_token_from_request(request)
@@ -167,3 +173,54 @@ class ProductDetails(Resource):
         db.session.commit()
 
         return 204
+
+
+@api.route('/buy/<int:product_id>')
+class BuyProduct(Resource):
+    @api.expect(buy_payload)
+    @api.marshal_with(buy_response_model)
+    @login_required
+    def post(self, product_id):
+        if not request.headers or 'Authorization' not in request.headers:
+            return {
+                "errors": [Errors.MISSING_TOKEN]
+            }, 403
+        token = get_custom_auth_token_from_request(request)
+        user_id = get_user_id_from_custom_token(token)
+        if not user_id:
+            return {
+                "errors": [Errors.INVALID_TOKEN]
+            }, 403
+        buyer = User.query.get(user_id)
+        
+        product = Product.query.get(product_id)
+        if product is None:
+            return {
+                "errors": [Errors.WRONG_PRODUCT_ID]
+            }, 404
+        
+        seller = User.query.get(product.seller_id)
+
+        amount = request.get_json()['amount']
+        if type(amount) != int:
+            return {
+                "errors": [Errors.NAN_PRODUCT_AMOUNT]
+            }
+        if buyer.balance < product.cost * amount:
+            return {
+                "errors": [Errors.INSUFFICIENT_FUNDS]
+            }, 403
+        if product.amount_available < amount:
+            return {
+                "errors": [Errors.NOT_ENOUGH_STOCK]
+            }, 400
+        
+        transaction_amount = product.cost * amount
+        buyer.balance -= transaction_amount
+        seller.balance += transaction_amount
+        product.amount_available -= amount
+        return {
+            "product": product,
+            "amount_purchased": amount,
+            "transaction_amount": transaction_amount
+        }, 200
