@@ -79,7 +79,7 @@ def create_app():
         )
         the_out_of_stock_product = models.Product(
             product_name='Mitsubishi Eclipse 1G 1:16 model',
-            amount_available=0
+            amount_available=0,
             cost=5000
         )
         db.session.add_all([the_insane_stock_product, the_low_stock_product, the_out_of_stock_product])
