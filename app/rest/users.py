@@ -150,7 +150,7 @@ class LogInUser(Resource):
 
 
 @api.route('/<int:user_id>')
-class GetUserDetails(Resource):
+class UserDetails(Resource):
     @login_required
     @api.marshal_with(login_response_model)
     def get(self, user_id):
@@ -165,6 +165,32 @@ class GetUserDetails(Resource):
                 "errors": [Errors.INVALID_TOKEN]
             }
         user = User.query.get(user_id)
+        return {
+            "user": user
+        }, 200
+    
+    @login_required
+    @api.marshal_with(login_response_model)
+    def patch(self, user_id):
+        if not request.headers or 'Authorization' not in request.headers:
+            return {
+                "errors": [Errors.MISSING_TOKEN]
+            }, 400
+        token = get_custom_auth_token_from_request(request)
+        internal_user_id = get_user_id_from_custom_token(token)
+        if not internal_user_id or internal_user_id != user_id:
+            return {
+                "errors": [Errors.ACCESS_DENIED]
+            }, 403
+        user = User.query.get(internal_user_id)
+        data = request.get_json()
+        if 'username' in data:
+            user.username = data['username']
+        if 'password' in data:
+            user.password = generate_password_hash(data['password'], method='sha256')
+        db.session.add(user)
+        db.session.commit()
+
         return {
             "user": user
         }, 200
