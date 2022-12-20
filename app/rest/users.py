@@ -7,7 +7,7 @@ from flask import jsonify, request, make_response
 from flask_restx import Namespace, Resource, fields
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import Form, StringField, PasswordField, RadioField, validators
-from sqlalchemy import func
+from sqlalchemy import func, delete
 
 from app.models import User, Role
 from app.rest.rest_models import user_model_private
@@ -175,7 +175,7 @@ class UserDetails(Resource):
         if not request.headers or 'Authorization' not in request.headers:
             return {
                 "errors": [Errors.MISSING_TOKEN]
-            }, 400
+            }, 403
         token = get_custom_auth_token_from_request(request)
         internal_user_id = get_user_id_from_custom_token(token)
         if not internal_user_id or internal_user_id != user_id:
@@ -194,6 +194,27 @@ class UserDetails(Resource):
         return {
             "user": user
         }, 200
+
+    # Would actually do a soft-delete in real world project.
+    # I'd add a DATE deleted_at field, and actually delete the record once so much time passed,
+    # that GDPR would require the deletion
+    @login_required
+    def delete(self, user_id):
+        if not request.headers or 'Authorization' not in request.headers:
+            return {
+                "errors": [Errors.MISSING_TOKEN]
+            }, 403
+        token = get_custom_auth_token_from_request(request)
+        internal_user_id = get_user_id_from_custom_token(token)
+        if not internal_user_id or internal_user_id != user_id:
+            return {
+                "errors": [Errors.ACCESS_DENIED]
+            }, 403
+        sql = delete(User).where(User.id == internal_user_id)
+        db.session.execute(sql)
+        db.session.commit()
+
+        return 204
 
 
 # Only enable this endpoint in DEV env. It's clearly unsecure to give out in PROD
