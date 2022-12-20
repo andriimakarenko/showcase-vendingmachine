@@ -59,11 +59,11 @@ class LoginForm(Form):
     password = password_field
 
 # TODO: Add user model with password cut out and return that instead of user_model
-user_model = make_model(api, User, "UserModel")
+# user_model = make_model(api, User, "UserModel")
 
 sign_up_payload = make_model(api, SignUpForm)
 sign_up_form_errors = make_form_errors_model(api, SignUpForm)
-sign_up_response_model = api.model("SignUpResponseModel", {
+sign_up_response_model = api.model("SignUpResponse", {
     "user": fields.Nested(user_model_private, allow_null=True),
     "token": fields.String(allow_null=True),
     "errors": fields.Raw(),
@@ -72,7 +72,7 @@ sign_up_response_model = api.model("SignUpResponseModel", {
 
 log_in_payload = make_model(api, LoginForm)
 login_form_errors = make_form_errors_model(api, LoginForm)
-login_response_model = api.model("LoginResponseModel", {
+login_response_model = api.model("LoginResponse", {
     "user": fields.Nested(user_model_private, allow_null=True),
     "token": fields.String(allow_null=True),
     "errors": fields.Raw(),

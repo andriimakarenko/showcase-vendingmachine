@@ -16,4 +16,4 @@ _user_overrides_private = {
     'role_id': None,
     'role': fields.String(attribute=get_role)
 }
-user_model_private = make_model(api, models.User, "UserPrivateModel", overrides=_user_overrides_private)
+user_model_private = make_model(api, models.User, "UserModelPrivate", overrides=_user_overrides_private)
