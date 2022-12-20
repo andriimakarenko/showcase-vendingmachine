@@ -20,7 +20,7 @@ def test_user_registration_valid(client, seed_database):
         follow_redirects=True
     )
     response_object = json.loads(response.data)
-    print(json.dumps(response_object, indent=2))
+    # print(json.dumps(response_object, indent=2))
     assert response.status_code == 201
     assert 'user' in response_object
     assert 'token' in response_object and response_object['token'] is not None
@@ -44,7 +44,7 @@ def test_user_registration_username_taken(client, seed_database):
         follow_redirects=True
     )
     response_object = json.loads(response.data)
-    print(json.dumps(response_object, indent=2))
+    # print(json.dumps(response_object, indent=2))
     assert response.status_code == 400
     assert errors.Errors.USERNAME_TAKEN in response_object['form_errors']['username']
 
