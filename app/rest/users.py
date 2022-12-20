@@ -10,6 +10,7 @@ from wtforms import Form, StringField, PasswordField, RadioField, validators
 from sqlalchemy import func
 
 from app.models import User, Role
+from app.rest.rest_models import user_model_private
 from database import db
 from app.errors import Errors, ErrorsForHumans
 from app.auth.jwt_auth import generate_custom_auth_token
@@ -63,7 +64,7 @@ user_model = make_model(api, User, "UserModel")
 sign_up_payload = make_model(api, SignUpForm)
 sign_up_form_errors = make_form_errors_model(api, SignUpForm)
 sign_up_response_model = api.model("SignUpResponseModel", {
-    "user": fields.Nested(user_model, allow_null=True),
+    "user": fields.Nested(user_model_private, allow_null=True),
     "token": fields.String(allow_null=True),
     "errors": fields.Raw(),
     "form_errors": fields.Nested(sign_up_form_errors, allow_null=True, skip_none=True),
@@ -72,7 +73,7 @@ sign_up_response_model = api.model("SignUpResponseModel", {
 log_in_payload = make_model(api, LoginForm)
 login_form_errors = make_form_errors_model(api, LoginForm)
 login_response_model = api.model("LoginResponseModel", {
-    "user": fields.Nested(user_model, allow_null=True),
+    "user": fields.Nested(user_model_private, allow_null=True),
     "token": fields.String(allow_null=True),
     "errors": fields.Raw(),
     "form_errors": fields.Nested(login_form_errors, allow_null=True, skip_none=True),

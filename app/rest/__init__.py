@@ -11,6 +11,7 @@ from flask.wrappers import Response  # pylint: disable=unused-import
 from flask_restx import Api
 from werkzeug.exceptions import BadRequest
 
+from app.rest.rest_models import api as rest_models_api
 from app.rest.users import api as users_api
 
 # Monkey-patch support for JSON into WTForms
@@ -34,6 +35,7 @@ rest_api = Api(
     validate=True,
 )
 
+rest_api.add_namespace(rest_models_api)
 rest_api.add_namespace(users_api)
 
 @rest_blueprint.after_request
