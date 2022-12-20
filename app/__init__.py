@@ -51,8 +51,8 @@ def create_app():
             role_id=vendor_id
         )
         rich_buyer = models.User(
-            username='MrBuyer',
-            password='sha256$Oi393u9gAIBibnzM$d575b373c5b8d037bb404ba828fe0e32322a80b4ddeccdd741ec92621e8378cf',
+            username='MrRichBuyer', # This below is a SHA256 of the word 'buyerpassword'
+            password='sha256$mK1fPDEZeKuMwZOY$653a36aa0a32b85de706c9e84158eba6a54df695ab288884ee6471e53abd13b9',
             balance=100500,
             role_id=buyer_id
         )
