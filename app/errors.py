@@ -11,6 +11,8 @@ class Errors(object):
     INVALID_LOGIN = "INVALID_LOGIN"
     USERNAME_TAKEN = "USERNAME_TAKEN"
     MISSING_TOKEN = "MISSING_TOKEN"
+    NAN_DEPOSIT = "NAN_DEPOSIT"
+    INVALID_AMOUNT = "INVALID_AMOUNT"
 
 
 class ErrorsForHumans(object):
@@ -23,3 +25,5 @@ class ErrorsForHumans(object):
     INVALID_LOGIN = "Your login or password was incorrect, please tyr again"
     USERNAME_TAKEN = "Sorry but this username is already taken"
     MISSING_TOKEN = "Sorry, your request needs a token"
+    NAN_DEPOSIT = "Sorry, you can only deposit a whole number of cents, specifically 5, 10, 20, 50, or 100"
+    INVALID_AMOUNT = "Sorry, you can only deposit 5, 10, 20, 50, or 100 cents"
