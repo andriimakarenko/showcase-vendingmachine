@@ -13,7 +13,10 @@ from app.models import User, Role
 from app.rest.rest_models import user_model_private
 from database import db
 from app.errors import Errors, ErrorsForHumans
-from app.auth.jwt_auth import generate_custom_auth_token
+from app.auth.jwt_auth import (
+    generate_custom_auth_token, get_user_id_from_custom_token,
+    get_custom_auth_token_from_request
+)
 from app.rest.utils import (
     make_model, make_model_from_form, make_form_errors_model,
     login_required, conditional_decorator
@@ -143,6 +146,27 @@ class LogInUser(Resource):
         return {
             "token": generate_custom_auth_token(user.id),
             "user": user,
+        }, 200
+
+
+@api.route('/<int:user_id>')
+class GetUserDetails(Resource):
+    @login_required
+    @api.marshal_with(login_response_model)
+    def get(self, user_id):
+        if 'Authorization' not in request.headers:
+            return {
+                "errors": [Errors.MISSING_TOKEN]
+            }
+        token = get_custom_auth_token_from_request(request)
+        user_id = get_user_id_from_custom_token(token)
+        if not user_id:
+            return {
+                "errors": [Errors.INVALID_TOKEN]
+            }
+        user = User.query.get(user_id)
+        return {
+            "user": user
         }, 200
 
 
