@@ -105,3 +105,65 @@ class ProductDetails(Resource):
         return {
             "product": product
         }, 200
+    
+    @login_required
+    @api.marshal_with(buy_response_model)
+    def patch(self, product_id):
+        if not request.headers or 'Authorization' not in request.headers:
+            return {
+                "errors": [Errors.MISSING_TOKEN]
+            }, 403
+        product = Product.query.get(product_id)
+        if product is None:
+            return {
+                "errors": [Errors.WRONG_PRODUCT_ID]
+            }
+
+        owner_id = product.seller_id
+        token = get_custom_auth_token_from_request(request)
+        internal_user_id = get_user_id_from_custom_token(token)
+        if not internal_user_id or internal_user_id != owner_id:
+            return {
+                "errors": [Errors.ACCESS_DENIED]
+            }, 403
+        data = request.get_json()
+        if 'name' in data:
+            product.product_name = data['name']
+        if 'cost' in data:
+            product.cost = data['cost']
+        if 'amount' in data:
+            product.amount_available = data['amount']
+        db.session.add(product)
+        db.session.commit()
+
+        return {
+            "product": product
+        }, 200
+
+    # Would actually do a soft-delete in real world project.
+    # I'd add a DATE deleted_at field, and actually delete the record once so much time passed,
+    # that GDPR would require the deletion
+    @login_required
+    def delete(self, product_id):
+        if not request.headers or 'Authorization' not in request.headers:
+            return {
+                "errors": [Errors.MISSING_TOKEN]
+            }, 403
+        product = Product.query.get(product_id)
+        if product is None:
+            return {
+                "errors": [Errors.WRONG_PRODUCT_ID]
+            }
+
+        owner_id = product.seller_id
+        token = get_custom_auth_token_from_request(request)
+        internal_user_id = get_user_id_from_custom_token(token)
+        if not internal_user_id or internal_user_id != owner_id:
+            return {
+                "errors": [Errors.ACCESS_DENIED]
+            }, 403
+        sql = delete(Product).where(product.id == product_id)
+        db.session.execute(sql)
+        db.session.commit()
+
+        return 204
