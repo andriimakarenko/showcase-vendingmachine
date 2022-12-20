@@ -13,6 +13,7 @@ from werkzeug.exceptions import BadRequest
 
 from app.rest.rest_models import api as rest_models_api
 from app.rest.users import api as users_api
+from app.rest.products import api as products_api
 
 # Monkey-patch support for JSON into WTForms
 wtforms_json.init()
@@ -37,6 +38,7 @@ rest_api = Api(
 
 rest_api.add_namespace(rest_models_api)
 rest_api.add_namespace(users_api)
+rest_api.add_namespace(products_api)
 
 @rest_blueprint.after_request
 def after_request(response):
