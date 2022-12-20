@@ -9,23 +9,13 @@ from app.auth.jwt_auth import generate_custom_auth_token
 from tests.utils import UserFactory, RoleFactory
 
 
-# @pytest.fixture
-# def user():
-#     test_user = UserFactory.create()
-#     yield test_user
+@pytest.fixture
+def app():
+    app = create_app()
+    return app
 
 
-@pytest.fixture(scope='module')
-def client():
-    flask_app = create_app()
-    flask_app.config.from_object('config.TestingConfig')
-
-    with flask_app.test_client() as testing_client:
-        with flask_app.app_context():
-            yield testing_client
-
-
-@pytest.fixture(scope='module')
+@pytest.fixture()
 def seed_database(client):
     db.create_all()
 
