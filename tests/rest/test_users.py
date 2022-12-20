@@ -126,3 +126,45 @@ def test_user_patch_unauthorized(client, seed_database):
     response_object = json.loads(response.data)
     assert errors.Errors.INVALID_TOKEN in response_object['errors']
     assert response.status_code == 403
+
+def test_user_delete(client, seed_database):
+    """
+    GIVEN a Flask-backed API configured for testing
+    WHEN the '/user' URL is gets a DELETE request for an existing user from the same user
+    THEN the user record gets deleted
+    """
+    response = client.delete(
+        url_for('api.user_user_details', user_id=1),
+        headers={'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoQGV4YW1wbGUuY29tIiwic3ViIjoiYXV0aEBleGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJpYXQiOjE2NzE1MTM5NDIsImV4cCI6MTcxNDcxMzk0MiwidXNlcl9pZCI6MX0.vHOp8RyDpm3Jrc-IsK1MY6lLU_SAe9yA_LQuepjup2w'},
+        follow_redirects=True
+    )
+    assert response.status_code == 200
+
+def test_user_delete_unauthenticated(client, seed_database):
+    """
+    GIVEN a Flask-backed API configured for testing
+    WHEN the '/user' URL is gets a DELETE request for an existing user without a token
+    THEN the deletion doesn't happen, 403 is returned
+    """
+    response = client.delete(
+        url_for('api.user_user_details', user_id=1),
+        follow_redirects=True
+    )
+    response_object = json.loads(response.data)
+    assert errors.Errors.MISSING_TOKEN in response_object['errors']
+    assert response.status_code == 403
+
+def test_user_patch_unauthorized(client, seed_database):
+    """
+    GIVEN a Flask-backed API configured for testing
+    WHEN the '/user' URL is gets a DELETE request for an existing user from another user
+    THEN the deletion doesn't happen, 403 is returned
+    """
+    response = client.delete(
+        url_for('api.user_user_details', user_id=1),
+        headers={'Authorization': 'Bearer invalid_token'},
+        follow_redirects=True
+    )
+    response_object = json.loads(response.data)
+    assert errors.Errors.INVALID_TOKEN in response_object['errors']
+    assert response.status_code == 403
