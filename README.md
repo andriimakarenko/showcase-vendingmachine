@@ -2,6 +2,7 @@
 Showcase API of a vending machine
 
 ## Prepequisites
+* Linux, FreeBSD, or macOS
 * Python 3.10+
 * Poetry
 
