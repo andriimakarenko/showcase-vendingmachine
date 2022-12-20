@@ -64,6 +64,27 @@ def create_app():
         )
         db.session.add_all([the_vendor, rich_buyer, broke_buyer])
         db.session.commit()
+
+        the_insane_stock_product = models.Product(
+            product_name='Bubble Gum',
+            amount_available=123456789,
+            cost=25,
+            seller_id=the_vendor.id
+        )
+        the_low_stock_product = models.Product(
+            product_name='8kWt Generator',
+            amount_available=42,
+            cost=100000,
+            seller_id=the_vendor.id
+        )
+        the_out_of_stock_product = models.Product(
+            product_name='Mitsubishi Eclipse 1G 1:16 model',
+            amount_available=0
+            cost=5000
+        )
+        db.session.add_all([the_insane_stock_product, the_low_stock_product, the_out_of_stock_product])
+        db.session.commit()
+
         print('Database seeded')
 
 
