@@ -80,8 +80,17 @@ def create_app():
         the_out_of_stock_product = models.Product(
             product_name='Mitsubishi Eclipse 1G 1:16 model',
             amount_available=0,
-            cost=5000
+            cost=5000,
+            seller_id=the_vendor.id
         )
+
+        print()
+        print()
+        print()
+        print(the_insane_stock_product.seller_id)
+        print()
+        print()
+        print()
         db.session.add_all([the_insane_stock_product, the_low_stock_product, the_out_of_stock_product])
         db.session.commit()
 

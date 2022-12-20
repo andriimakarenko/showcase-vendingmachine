@@ -103,7 +103,7 @@ class AddProduct(Resource):
 class ProductDetails(Resource):
     @api.marshal_with(product_details_model)
     def get(self, product_id):
-        product = User.query.get(product_id)
+        product = Product.query.get(product_id)
         if product is None:
             return {
                 "errors": [Errors.WRONG_PRODUCT_ID]
@@ -202,11 +202,18 @@ class BuyProduct(Resource):
         seller = User.query.get(product.seller_id)
 
         amount = request.get_json()['amount']
+        print()
+        print()
+        print(product)
+        print()
+        print()
+        print(1/0)
+        transaction_amount = product.cost * amount
         if type(amount) != int:
             return {
                 "errors": [Errors.NAN_PRODUCT_AMOUNT]
             }
-        if buyer.balance < product.cost * amount:
+        if buyer.balance < transaction_amount:
             return {
                 "errors": [Errors.INSUFFICIENT_FUNDS]
             }, 403
@@ -214,8 +221,7 @@ class BuyProduct(Resource):
             return {
                 "errors": [Errors.NOT_ENOUGH_STOCK]
             }, 400
-        
-        transaction_amount = product.cost * amount
+
         buyer.balance -= transaction_amount
         seller.balance += transaction_amount
         product.amount_available -= amount
