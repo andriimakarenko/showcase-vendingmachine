@@ -55,7 +55,7 @@ def test_user_get_details(client, seed_database):
     THEN the user details are returned
     """
     response = client.get(
-        url_for('api.user_get_user_details', user_id=1),
+        url_for('api.user_user_details', user_id=1),
         headers={'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoQGV4YW1wbGUuY29tIiwic3ViIjoiYXV0aEBleGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJpYXQiOjE2NzE1MTM5NDIsImV4cCI6MTcxNDcxMzk0MiwidXNlcl9pZCI6MX0.vHOp8RyDpm3Jrc-IsK1MY6lLU_SAe9yA_LQuepjup2w'},
         follow_redirects=True
     )
@@ -70,7 +70,7 @@ def test_user_get_details_unauthorized(client, seed_database):
     THEN the user details are returned
     """
     response = client.get(
-        url_for('api.user_get_user_details', user_id=1),
+        url_for('api.user_user_details', user_id=1),
         follow_redirects=True
     )
     response_object = json.loads(response.data)
@@ -85,14 +85,14 @@ def test_user_patch(client, seed_database):
     """
     req_json = {"username": "MrNewVendor"}
     response = client.patch(
-        url_for('api.user_update_user_details', user_id=1),
+        url_for('api.user_user_details', user_id=1),
         headers={'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoQGV4YW1wbGUuY29tIiwic3ViIjoiYXV0aEBleGFtcGxlLmNvbSIsImF1ZCI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJpYXQiOjE2NzE1MTM5NDIsImV4cCI6MTcxNDcxMzk0MiwidXNlcl9pZCI6MX0.vHOp8RyDpm3Jrc-IsK1MY6lLU_SAe9yA_LQuepjup2w'},
         json=req_json,
         follow_redirects=True
     )
     response_object = json.loads(response.data)
     assert 'user' in response_object
-    assert response_object['user']['username'] == 'mrnewvendor'
+    assert response_object['user']['username'] == 'MrNewVendor'
 
 def test_user_patch_unauthenticated(client, seed_database):
     """
@@ -102,13 +102,13 @@ def test_user_patch_unauthenticated(client, seed_database):
     """
     req_json = {"username": "MrNewVendor"}
     response = client.patch(
-        url_for('api.user_update_user_details', user_id=1),
+        url_for('api.user_user_details', user_id=1),
         json=req_json,
         follow_redirects=True
     )
     response_object = json.loads(response.data)
     assert errors.Errors.MISSING_TOKEN in response_object['errors']
-    assert response.status_code == 400
+    assert response.status_code == 403
 
 def test_user_patch_unauthorized(client, seed_database):
     """
@@ -118,11 +118,11 @@ def test_user_patch_unauthorized(client, seed_database):
     """
     req_json = {"username": "MrNewVendor"}
     response = client.patch(
-        url_for('api.user_update_user_details', user_id=1),
+        url_for('api.user_user_details', user_id=1),
         headers={'Authorization': 'Bearer invalid_token'},
         json=req_json,
         follow_redirects=True
     )
     response_object = json.loads(response.data)
-    assert errors.Errors.ACCESS_DENIED in response_object['errors']
+    assert errors.Errors.INVALID_TOKEN in response_object['errors']
     assert response.status_code == 403
