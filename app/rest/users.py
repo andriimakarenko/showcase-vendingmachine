@@ -109,7 +109,12 @@ class SignUpUser(Resource):
         )
         db.session.add(user)
         db.session.commit()
+
+        # Token relies on id, but there is no id before commit, hence why commit twice
         token = generate_custom_auth_token(user.id)
+        user.token = token
+        db.session.add(user)
+        db.session.commit()
         return {
             "user": user,
             "token": token,
