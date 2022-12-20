@@ -26,7 +26,7 @@ def client():
 
 
 @pytest.fixture(scope='module')
-def seed_database(test_client):
+def seed_database(client):
     db.create_all()
 
     # Insert user data
@@ -43,7 +43,7 @@ def seed_database(test_client):
         role='vendor'
     )
     vendor2 = UserFactory.create(
-        username='MrVendor',
+        username='MrSecondVendor',
         role='vendor'
     )
     buyer1 = UserFactory.create(
@@ -68,32 +68,32 @@ def seed_database(test_client):
 
 @pytest.fixture()
 def vendor_role():
-    role = RoleFactory.create(id=1, title='vendor')
+    role = RoleFactory.create(title='vendor')
     yield role
 
 
 @pytest.fixture()
 def buyer_role():
-    role = RoleFactory.create(id=2, title='buyer')
+    role = RoleFactory.create(title='buyer')
     yield role
 
 
-@pytest.fixture()
-def user():
-    test_user = UserFactory.create()
-    token = generate_custom_auth_token(test_user.id)
-    yield test_user, token
+# @pytest.fixture()
+# def user():
+#     test_user = UserFactory.create()
+#     token = generate_custom_auth_token(test_user.id)
+#     yield test_user, token
 
 
 @pytest.fixture()
 def vendor():
-    test_user = UserFactory.create(id=1, role='vendor')
+    test_user = UserFactory.create(role_id=1)
     token = generate_custom_auth_token(test_user.id)
     yield test_user, token
 
 
 @pytest.fixture()
 def buyer():
-    test_user = UserFactory.create(id=2, role='buyer')
+    test_user = UserFactory.create(role_id=2)
     token = generate_custom_auth_token(test_user.id)
     yield test_user, token
