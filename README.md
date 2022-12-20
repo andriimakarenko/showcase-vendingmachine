@@ -14,3 +14,7 @@ Showcase API of a vending machine
 
 ## Swagger
 Swagger API is available at `{base_url}/api`
+
+## How to test
+    $> source "$(poetry env info --path)/bin/activate"
+    $> python -m pytest
