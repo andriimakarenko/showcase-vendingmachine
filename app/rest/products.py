@@ -9,6 +9,7 @@ from wtforms import Form, StringField, PasswordField, RadioField, validators, In
 from sqlalchemy import func, delete
 
 from app.models import User, Role, Product
+from app.rest.rest_models import product_model
 from database import db
 from app.errors import Errors, ErrorsForHumans
 from app.auth.jwt_auth import (
@@ -43,7 +44,6 @@ class AddProductForm(Form):
 class BuyForm(Form):
     amount = product_amount_field
 
-product_model = make_model(api, Product, "ProductModel")
 add_product_payload = make_model(api, AddProductForm)
 add_product_form_errors = make_form_errors_model(api, AddProductForm)
 add_product_response_model = api.model("AddProductResponse", {
@@ -194,6 +194,12 @@ class BuyProduct(Resource):
         buyer = User.query.get(user_id)
         
         product = Product.query.get(product_id)
+
+        # buyer_query = User.query
+        # buyer = buyer_query.get(user_id)
+
+        # product_query = Product.query
+        # product = product_query.get(product_id)
         if product is None:
             return {
                 "errors": [Errors.WRONG_PRODUCT_ID]
