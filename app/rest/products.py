@@ -202,12 +202,6 @@ class BuyProduct(Resource):
         seller = User.query.get(product.seller_id)
 
         amount = request.get_json()['amount']
-        print()
-        print()
-        print(product)
-        print()
-        print()
-        print(1/0)
         transaction_amount = product.cost * amount
         if type(amount) != int:
             return {
