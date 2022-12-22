@@ -170,6 +170,9 @@ class UserDetails(Resource):
                 "errors": [Errors.INVALID_TOKEN]
             }
         user = User.query.get(user_id)
+        user.password = None # hotfix, properly done with overridden models
+        user.token = None # hotfix
+        user.balance = None # same hotfix
         return {
             "user": user
         }, 200
