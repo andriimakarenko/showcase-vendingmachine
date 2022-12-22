@@ -41,9 +41,9 @@ class Product(db.Model):
     __tablename__ = 'products'
 
     id = db.Column(db.Integer, primary_key=True)
-    product_name = db.Column(db.String(160)),
-    amount_available = db.Column(db.Integer),
-    cost = db.Column(db.Integer),
+    product_name = db.Column(db.String(160))
+    amount_available = db.Column(db.Integer)
+    cost = db.Column(db.Integer)
     seller_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self) -> str:
