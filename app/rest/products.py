@@ -18,11 +18,17 @@ from app.auth.jwt_auth import (
 )
 from app.rest.utils import (
     make_model, make_model_from_form, make_form_errors_model,
-    login_required, conditional_decorator
+    login_required, conditional_decorator, BSTNode, build_change
 )
 
 
 api = Namespace('product', path='/product')
+
+
+coin_values = [20, 5, 10, 50, 100]
+coin_bst = BSTNode()
+for val in coin_values:
+    coin_bst.insert(val)
 
 
 product_name_validators = [
@@ -43,6 +49,7 @@ class AddProductForm(Form):
 
 class BuyForm(Form):
     amount = product_amount_field
+
 
 add_product_payload = make_model(api, AddProductForm)
 add_product_form_errors = make_form_errors_model(api, AddProductForm)
@@ -67,6 +74,7 @@ product_details_model = api.model("ProductDetails", {
     "errors": fields.Raw(),
     "form_errors": fields.Nested(buy_form_errors, allow_null=True, skip_none=True),
 })
+
 
 @api.route('')
 class AddProduct(Resource):
@@ -194,12 +202,6 @@ class BuyProduct(Resource):
         buyer = User.query.get(user_id)
         
         product = Product.query.get(product_id)
-
-        # buyer_query = User.query
-        # buyer = buyer_query.get(user_id)
-
-        # product_query = Product.query
-        # product = product_query.get(product_id)
         if product is None:
             return {
                 "errors": [Errors.WRONG_PRODUCT_ID]
@@ -225,8 +227,11 @@ class BuyProduct(Resource):
         buyer.balance -= transaction_amount
         seller.balance += transaction_amount
         product.amount_available -= amount
+
+        change = build_change(buyer.balance, coin_bst)
         return {
             "product": product,
             "amount_purchased": amount,
-            "transaction_amount": transaction_amount
+            "transaction_amount": transaction_amount,
+            "change": change
         }, 200
