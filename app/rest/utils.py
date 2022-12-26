@@ -57,10 +57,6 @@ class BSTNode:
         Find and return the greatest value in the BST
         that is less than or equal to the given value.
         """
-        # if self.val == val or \
-        #   (self.left.val < val and self.right.val > val):
-        #     return self.val
-
         if self.val > val:
             if not self.left:
                 return None
