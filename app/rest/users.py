@@ -225,6 +225,33 @@ class UserDetails(Resource):
         return 204
 
 
+@api.route('/deposit')
+class Deposit(Resource):
+    @login_required
+    def post(self):
+        allowed_deposits = [5, 10, 20, 50, 100]
+        if not request.headers or 'Authorization' not in request.headers:
+            return {
+                "errors": [Errors.MISSING_TOKEN]
+            }, 403
+        token = get_custom_auth_token_from_request(request)
+        internal_user_id = get_user_id_from_custom_token(token)
+        user = User.query.get(internal_user_id)
+        amount = request.get_json()['amount']
+        if type(amount) is not int or amount not in allowed_deposits:
+            return {
+                "errors": [Errors.INVALID_AMOUNT]
+            }
+        user.balance += amount
+        db.session.add(user)
+        db.session.commit()
+
+        return {
+            "deposit": amount,
+            "total_balance": user.balance
+        }, 200
+
+
 # Only enable this endpoint in DEV env. It's clearly unsecure to give out in PROD
 @conditional_decorator(api.route('/all_users'), os.environ.get('FLASK_DEBUG'))
 class GetAllUsers(Resource):
