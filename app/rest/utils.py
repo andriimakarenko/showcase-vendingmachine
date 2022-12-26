@@ -81,8 +81,9 @@ def build_change(amount, coin_bst):
 
     dollars = amount % 100
     if dollars:
-        # append 100 to list n times
-        pass
+        dollar_list = [100] * dollars
+        result.extend(dollar_list)
+        amount -= 100 * dollars
 
     while amount > 0:
         coin = coin_bst.greatest_lte_val(amount)
