@@ -26,6 +26,72 @@ class APIError(Exception):
         self.errors = errors
 
 
+class BSTNode:
+    def __init__(self, val=None):
+        self.left = None
+        self.right = None
+        self.val = val
+
+    def insert(self, val):
+        if not self.val:
+            self.val = val
+            return
+
+        if self.val == val:
+            return
+
+        if val < self.val:
+            if self.left:
+                self.left.insert(val)
+                return
+            self.left = BSTNode(val)
+            return
+
+        if self.right:
+            self.right.insert(val)
+            return
+        self.right = BSTNode(val)
+
+    def greatest_lte_val(self, val):
+        """
+        Find and return the greatest value in the BST
+        that is less than or equal to the given value.
+        """
+        # if self.val == val or \
+        #   (self.left.val < val and self.right.val > val):
+        #     return self.val
+
+        if self.val > val:
+            if not self.left:
+                return None
+            if self.left.val <= val:
+                return self.left.val
+            return self.left.greatest_lte_val(val)
+
+        if self.val < val:
+            if (not self.right) or (self.right.val > val):
+                return self.val
+            return self.right.greatest_lte_val(val)
+
+        return self.val
+
+
+def build_change(amount, coin_bst):
+    result = []
+
+    dollars = amount % 100
+    if dollars:
+        # append 100 to list n times
+        pass
+
+    while amount > 0:
+        coin = coin_bst.greatest_lte_val(amount)
+        result.append(coin)
+        amount -= coin
+
+    return result
+
+
 def conditional_decorator(decorator, condition, *args):
 
     def wrapper(function):
