@@ -1,7 +1,8 @@
 import json
 from flask import url_for
 
-from app import errors
+from app import errors, models
+from sqlalchemy import func
 
 def test_user_registration_valid(client, seed_database):
     """
@@ -168,3 +169,64 @@ def test_user_patch_unauthorized(client, seed_database):
     response_object = json.loads(response.data)
     assert errors.Errors.INVALID_TOKEN in response_object['errors']
     assert response.status_code == 403
+
+def test_user_deposit(client, seed_database):
+    """
+    GIVEN a Flask-backed API configured for testing
+    WHEN the '/user/deposit/<int:amount>' URL is gets a PUT request from an existing user and the amount is legal
+    THEN the user's deposit increases by that amount
+    """
+    buyer = models.User.query.filter(func.lower(models.User.username) == 'mrbuyer').first()
+
+    response = client.post(
+        url_for('api.user_deposit', amount=50),
+        headers={'Authorization': f'Bearer {buyer.token}'},
+        follow_redirects=True
+    )
+    response_object = json.loads(response.data)
+    assert response_object['deposit'] == 50
+    assert response_object['total_balance'] == 50
+
+    response = client.post(
+        url_for('api.user_deposit', amount=50),
+        headers={'Authorization': f'Bearer {buyer.token}'},
+        follow_redirects=True
+    )
+    response_object = json.loads(response.data)
+    assert response_object['deposit'] == 50
+    assert response_object['total_balance'] == 100
+
+def test_user_deposit_NaN(client, seed_database):
+    """
+    GIVEN a Flask-backed API configured for testing
+    WHEN the '/user/deposit/<int:amount>' URL is gets a PUT request with a NaN amount
+    THEN the corresponging error is thrown
+    """
+    buyer = models.User.query.filter(func.lower(models.User.username) == 'mrbuyer').first()
+
+    failed_as_expected = False
+    try:
+        response = client.put(
+            url_for('api.user_deposit', amount='abracadabra'),
+            headers={'Authorization': f'Bearer {buyer.token}'},
+            follow_redirects=True
+        )
+    except:
+        failed_as_expected = True
+    assert failed_as_expected
+
+def test_user_deposit_invalid_amount(client, seed_database):
+    """
+    GIVEN a Flask-backed API configured for testing
+    WHEN the '/user/deposit/<int:amount>' URL is gets a PUT request with an incorrect amount
+    THEN the corresponging error is thrown
+    """
+    buyer = models.User.query.filter(func.lower(models.User.username) == 'mrbuyer').first()
+
+    response = client.post(
+        url_for('api.user_deposit', amount=42),
+        headers={'Authorization': f'Bearer {buyer.token}'},
+        follow_redirects=True
+    )
+    response_object = json.loads(response.data)
+    assert errors.Errors.INVALID_AMOUNT in response_object['errors']
