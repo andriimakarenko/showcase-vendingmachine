@@ -51,6 +51,12 @@ def seed_database(client):
     db.session.add(buyer2)
     db.session.commit()
 
+    for user in [vendor1, vendor2, buyer1, buyer2]:
+        user.token = generate_custom_auth_token(user.id)
+    
+    db.session.add_all([vendor1, vendor2, buyer1, buyer2])
+    db.session.commit()
+
     yield
 
     db.drop_all()

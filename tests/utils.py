@@ -1,6 +1,7 @@
 from werkzeug.security import generate_password_hash
 
 import app.models as models
+from app.auth.jwt_auth import generate_custom_auth_token
 
 FAKE_USER_DATA = {
     'username': 'validuser',
@@ -11,7 +12,7 @@ FAKE_USER_DATA = {
 
 class UserFactory(object):
     @classmethod
-    def create(cls, username=None, password=None, balance=None, role=None, role_id=None):
+    def create(cls, username=None, password=None, token=None, balance=None, role=None, role_id=None):
         data = FAKE_USER_DATA.copy()
 
         if username is None:
@@ -30,9 +31,15 @@ class UserFactory(object):
         elif role is not None:
             data['role_id'] = models.Role.query.filter_by(title=role).first().id
 
+        if token is None:
+            data['token'] = generate_custom_auth_token(data['username'])
+        else:
+            data['token'] = token
+
         user = models.User(
             username=data['username'].lower(),
             password=generate_password_hash(data['password'], method='sha256'),
+            token=data['token'],
             balance=data['balance'],
             role_id=data['role_id']
         )
