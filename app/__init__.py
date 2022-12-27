@@ -57,8 +57,8 @@ def create_app():
             role_id=buyer_id
         )
         broke_buyer = models.User(
-            username='MrBeggar',
-            password='sha256$Oi393u9gAIBibnzM$d575b373c5b8d037bb404ba828fe0e32322a80b4ddeccdd741ec92621e8378cf',
+            username='MrBeggar',  # This below is a SHA256 of the word 'buyerpassword'
+            password='sha256$mK1fPDEZeKuMwZOY$653a36aa0a32b85de706c9e84158eba6a54df695ab288884ee6471e53abd13b9',
             balance=0,
             role_id=buyer_id
         )
@@ -72,15 +72,15 @@ def create_app():
             seller_id=the_vendor.id
         )
         the_low_stock_product = models.Product(
-            product_name='8kWt Generator',
+            product_name='Toy Generator',
             amount_available=42,
-            cost=100000,
+            cost=70,
             seller_id=the_vendor.id
         )
         the_out_of_stock_product = models.Product(
-            product_name='Mitsubishi Eclipse 1G 1:16 model',
+            product_name='Mitsubishi Eclipse 1G 1:48 model',
             amount_available=0,
-            cost=5000,
+            cost=120,
             seller_id=the_vendor.id
         )
         db.session.add_all([the_insane_stock_product, the_low_stock_product, the_out_of_stock_product])
