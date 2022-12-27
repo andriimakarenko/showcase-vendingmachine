@@ -225,10 +225,10 @@ class UserDetails(Resource):
         return 204
 
 
-@api.route('/deposit')
+@api.route('/deposit/<int:amount>')
 class Deposit(Resource):
     @login_required
-    def post(self):
+    def post(self, amount):
         allowed_deposits = [5, 10, 20, 50, 100]
         if not request.headers or 'Authorization' not in request.headers:
             return {
@@ -237,7 +237,6 @@ class Deposit(Resource):
         token = get_custom_auth_token_from_request(request)
         internal_user_id = get_user_id_from_custom_token(token)
         user = User.query.get(internal_user_id)
-        amount = request.get_json()['amount']
         if type(amount) is not int or amount not in allowed_deposits:
             return {
                 "errors": [Errors.INVALID_AMOUNT]
