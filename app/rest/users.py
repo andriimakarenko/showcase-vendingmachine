@@ -237,7 +237,7 @@ class Deposit(Resource):
         token = get_custom_auth_token_from_request(request)
         internal_user_id = get_user_id_from_custom_token(token)
         user = User.query.get(internal_user_id)
-        if type(amount) is not int or amount not in allowed_deposits:
+        if amount not in allowed_deposits:
             return {
                 "errors": [Errors.INVALID_AMOUNT]
             }
