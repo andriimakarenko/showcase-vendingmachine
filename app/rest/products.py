@@ -65,6 +65,7 @@ buy_response_model = api.model("BuyResponse", {
     "product": fields.Nested(product_model),
     "amount_purchased": fields.Integer(),
     "transaction_amount": fields.Integer(),
+    "change": fields.List(fields.Integer),
     "errors": fields.Raw(),
     "form_errors": fields.Nested(buy_form_errors, allow_null=True, skip_none=True),
 })
