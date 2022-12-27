@@ -13,6 +13,10 @@ class Errors(object):
     MISSING_TOKEN = "MISSING_TOKEN"
     NAN_DEPOSIT = "NAN_DEPOSIT"
     INVALID_AMOUNT = "INVALID_AMOUNT"
+    WRONG_PRODUCT_ID = "WRONG_PRODUCT_ID"
+    NAN_PRODUCT_AMOUNT = "NAN_PRODUCT_AMOUNT"
+    INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS"
+    NOT_ENOUGH_STOCK = "NOT_ENOUGH_STOCK"
 
 
 class ErrorsForHumans(object):
@@ -27,3 +31,7 @@ class ErrorsForHumans(object):
     MISSING_TOKEN = "Sorry, your request needs a token"
     NAN_DEPOSIT = "Sorry, you can only deposit a whole number of cents, specifically 5, 10, 20, 50, or 100"
     INVALID_AMOUNT = "Sorry, you can only deposit 5, 10, 20, 50, or 100 cents"
+    WRONG_PRODUCT_ID = "Please provide the correct product ID"
+    NAN_PRODUCT_AMOUNT = "Please provide the correct amount of product"
+    INSUFFICIENT_FUNDS = "Not enough funds in your balance, please refill"
+    NOT_ENOUGH_STOCK = "Unfortunately, there is less items of this position in stock than you wanted to buy"
