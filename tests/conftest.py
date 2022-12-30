@@ -57,7 +57,7 @@ def seed_database(client):
     db.session.add_all([vendor1, vendor2, buyer1, buyer2])
     db.session.commit()
 
-    yield
+    yield db
 
     db.drop_all()
 
