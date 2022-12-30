@@ -75,7 +75,7 @@ class BSTNode:
 def build_change(amount, coin_bst):
     result = []
 
-    dollars = amount % 100
+    dollars = amount // 100
     if dollars:
         dollar_list = [100] * dollars
         result.extend(dollar_list)
