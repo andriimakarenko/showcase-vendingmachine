@@ -30,7 +30,7 @@ class UserFactory(object):
         if role_id is not None:
             data['role_id'] = role_id
         elif role is not None:
-            data['role_id'] = RoleFactory.get_or_create(role).id
+            data['role_id'] = RoleFactory.get_or_create(title=role, db=db).id
 
         user = models.User(
             username=data['username'].lower(),
@@ -65,20 +65,25 @@ FAKE_ROLE_DATA = {'title': 'buyer'}
 
 class RoleFactory(object):
     @classmethod
-    def create(cls, title=None):
+    def create(cls, title=None, db=None):
         data = FAKE_ROLE_DATA.copy()
 
         if title is not None:
             data['title'] = title
 
         role = models.Role(title=data['title'])
+
+        if db is not None:
+            db.session.add(role)
+            db.session.commit()
+
         return role
 
     @classmethod
-    def get_or_create(cls, title):
+    def get_or_create(cls, title, db=None):
         role = models.Role.query.filter_by(title=title).first()
         if not role:
-            role = models.Role(title=title)
+            role = cls.create(title=title, db=db)
 
         return role
 
@@ -93,7 +98,7 @@ FAKE_PRODUCT_DATA = {
 class ProductFactory(object):
     @classmethod
     def create(cls, product_name=None, amount_available=None, cost=None, seller_id=None, db=None):
-        data = FAKE_USER_DATA.copy()
+        data = FAKE_PRODUCT_DATA.copy()
 
         if product_name is None:
             data['product_name'] = product_name
@@ -107,7 +112,7 @@ class ProductFactory(object):
         if seller_id is not None:
             data['seller_id'] = seller_id
         else:
-            vendor_role_id = RoleFactory.get_or_create('vendor').id
+            vendor_role_id = RoleFactory.get_or_create(title='vendor', db=db).id
             first_vendor = models.User.query.filter_by(role_id=vendor_role_id).first()
             data['seller_id'] = first_vendor.id
 
