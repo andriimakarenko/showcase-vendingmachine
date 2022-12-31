@@ -13,7 +13,7 @@ FAKE_USER_DATA = {
 
 class UserFactory(object):
     @classmethod
-    def create(cls, username=None, password=None, token=None, balance=None, role=None, role_id=None, db=None):
+    def create(cls, username=None, password=None, balance=None, role=None, role_id=None, db=None):
         data = FAKE_USER_DATA.copy()
 
         if username is None:
@@ -32,18 +32,14 @@ class UserFactory(object):
         elif role is not None:
             data['role_id'] = models.Role.query.filter_by(title=role).first().id
 
-        if token is not None:
-            data['token'] = token
-
         user = models.User(
             username=data['username'].lower(),
             password=generate_password_hash(data['password'], method='sha256'),
-            token=data['token'],
             balance=data['balance'],
             role_id=data['role_id']
         )
 
-        if db is not None and token is None:
+        if db is not None:
             db.session.add(user)
             db.session.commit()
             token = generate_custom_auth_token(user.id)
@@ -69,7 +65,7 @@ FAKE_ROLE_DATA = {'title': 'buyer'}
 
 class RoleFactory(object):
     @classmethod
-    def create(cls, id=None, title=None):
+    def create(cls, title=None):
         data = FAKE_ROLE_DATA.copy()
 
         if title is not None:
@@ -77,3 +73,45 @@ class RoleFactory(object):
 
         role = models.Role(title=data['title'])
         return role
+
+
+FAKE_PRODUCT_DATA = {
+    'product_name': 'validname',
+    'amount_available': 100,
+    'cost': 5,
+    'seller_id': 1,
+}
+
+class ProductFactory(object):
+    @classmethod
+    def create(cls, product_name=None, amount_available=None, cost=None, seller_id=None, db=None):
+        data = FAKE_USER_DATA.copy()
+
+        if product_name is None:
+            data['product_name'] = product_name
+
+        if amount_available is not None:
+            data['amount_available'] = amount_available
+
+        if cost is not None:
+            data['cost'] = cost
+
+        if seller_id is not None:
+            data['seller_id'] = seller_id
+        else:
+            vendor_role_id = models.Role.query.filter_by(title='vendor').first().id
+            first_vendor = models.User.query.filter_by(role_id=vendor_role_id).first()
+            data['seller_id'] = first_vendor.id
+
+        product = models.Product(
+            product_name=data['product_name'],
+            amount_available=data['amount_available'],
+            cost=data['cost'],
+            seller_id=data['seller_id']
+        )
+
+        if db is not None:
+            db.session.add(product)
+            db.session.commit()
+
+        return product
