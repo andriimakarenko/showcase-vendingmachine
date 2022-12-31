@@ -3,7 +3,7 @@ import pytest
 from werkzeug.security import generate_password_hash
 
 from app import create_app
-from database import db
+from database import db as project_db
 from app.auth.jwt_auth import generate_custom_auth_token
 
 from tests.utils import UserFactory, RoleFactory
@@ -17,14 +17,14 @@ def app():
 
 @pytest.fixture()
 def seed_database(client):
-    db.create_all()
+    project_db.create_all()
 
     # Insert user data
     vendor_role = RoleFactory.create(title='vendor')
     buyer_role = RoleFactory.create(title='buyer')
-    db.session.add(vendor_role)
-    db.session.add(buyer_role)
-    db.session.commit()
+    project_db.session.add(vendor_role)
+    project_db.session.add(buyer_role)
+    project_db.session.commit()
     
     # After committing the models will now have ids set
 
@@ -45,21 +45,29 @@ def seed_database(client):
         role='buyer',
         balance=100500
     )
-    db.session.add(vendor1)
-    db.session.add(vendor2)
-    db.session.add(buyer1)
-    db.session.add(buyer2)
-    db.session.commit()
+    project_db.session.add(vendor1)
+    project_db.session.add(vendor2)
+    project_db.session.add(buyer1)
+    project_db.session.add(buyer2)
+    project_db.session.commit()
 
     for user in [vendor1, vendor2, buyer1, buyer2]:
         user.token = generate_custom_auth_token(user.id)
     
-    db.session.add_all([vendor1, vendor2, buyer1, buyer2])
-    db.session.commit()
+    project_db.session.add_all([vendor1, vendor2, buyer1, buyer2])
+    project_db.session.commit()
 
-    yield db
+    yield {
+        'vendors': [vendor1, vendor2],
+        'buyers': [buyer1, buyer2]
+    }
 
-    db.drop_all()
+    project_db.drop_all()
+
+
+@pytest.fixture()
+def db(client):
+    yield project_db
 
 
 @pytest.fixture()
