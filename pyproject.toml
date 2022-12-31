@@ -24,3 +24,25 @@ pylint = "^2.15.9"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.pylint.messages_control]
+
+max-line-length = 160
+
+disable = [
+  "missing-docstring",
+  "missing-class-docstring",
+  "missing-module-docstring",
+  "no-member",
+  "too-few-public-methods",
+  "missing-function-docstring",
+  "too-many-arguments",
+  "fixme",
+  "unused-argument",
+  "duplicate-code",
+  "broad-except",
+  "bare-except",
+  "invalid-name",
+  "trailing-comma-tuple",
+]
