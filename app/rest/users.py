@@ -1,24 +1,21 @@
-import jwt
-import datetime
-import uuid
 import re
 import os
-from flask import jsonify, request, make_response
+from flask import jsonify, request
 from flask_restx import Namespace, Resource, fields
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import Form, StringField, PasswordField, RadioField, validators
 from sqlalchemy import func, delete
 
+from database import db
 from app.models import User, Role
 from app.rest.rest_models import user_model_private
-from database import db
-from app.errors import Errors, ErrorsForHumans
+from app.errors import Errors
 from app.auth.jwt_auth import (
     generate_custom_auth_token, get_user_id_from_custom_token,
     get_custom_auth_token_from_request
 )
 from app.rest.utils import (
-    make_model, make_model_from_form, make_form_errors_model,
+    make_model, make_form_errors_model,
     login_required, conditional_decorator
 )
 
@@ -89,9 +86,9 @@ class SignUpUser(Resource):
     @api.doc(security=None)
     @api.marshal_with(sign_up_response_model)
     def post(self):
-        data = request.get_json() 
+        data = request.get_json()
         hashed_password = generate_password_hash(data['password'], method='sha256')
-        
+
         user = User.query.filter(func.lower(User.username) == func.lower(data["username"])).first()
 
         if user:
@@ -176,7 +173,7 @@ class UserDetails(Resource):
         return {
             "user": user
         }, 200
-    
+
     @login_required
     @api.marshal_with(login_response_model)
     def patch(self, user_id):
@@ -257,12 +254,12 @@ class GetAllUsers(Resource):
     @login_required
     def get(self):
         users = User.query.all()
-        result = []  
-        for user in users:  
-            user_data = {}  
-            user_data['id'] = user.id 
+        result = []
+        for user in users:
+            user_data = {}
+            user_data['id'] = user.id
             user_data['username'] = user.username
             user_data['role'] = Role.query.get(user.role_id).title
 
-            result.append(user_data)  
+            result.append(user_data)
         return jsonify({'users': result})

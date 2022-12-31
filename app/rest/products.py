@@ -1,24 +1,16 @@
-import jwt
-import datetime
-import uuid
-import re
-import os
-from flask import jsonify, request, make_response
+from flask import request
 from flask_restx import Namespace, Resource, fields
-from wtforms import Form, StringField, PasswordField, RadioField, validators, IntegerField
-from sqlalchemy import func, delete
+from wtforms import Form, StringField, validators, IntegerField
+from sqlalchemy import delete
 
+from database import db
 from app.models import User, Role, Product
 from app.rest.rest_models import product_model
-from database import db
-from app.errors import Errors, ErrorsForHumans
-from app.auth.jwt_auth import (
-    generate_custom_auth_token, get_user_id_from_custom_token,
-    get_custom_auth_token_from_request
-)
+from app.errors import Errors
+from app.auth.jwt_auth import get_user_id_from_custom_token, get_custom_auth_token_from_request
 from app.rest.utils import (
-    make_model, make_model_from_form, make_form_errors_model,
-    login_required, conditional_decorator, BSTNode, build_change
+    make_model, make_form_errors_model,
+    login_required, BSTNode, build_change
 )
 
 
@@ -93,7 +85,7 @@ class AddProduct(Resource):
             return {
                 "errors": [Errors.NOT_VENDOR]
             }, 403
-        
+
         product = Product(
             product_name=data['name'],
             cost=data['cost'],
@@ -120,7 +112,7 @@ class ProductDetails(Resource):
         return {
             "product": product
         }, 200
-    
+
     @login_required
     @api.marshal_with(product_details_model)
     def patch(self, product_id):
@@ -201,21 +193,17 @@ class BuyProduct(Resource):
                 "errors": [Errors.INVALID_TOKEN]
             }, 403
         buyer = User.query.get(user_id)
-        
+
         product = Product.query.get(product_id)
         if product is None:
             return {
                 "errors": [Errors.WRONG_PRODUCT_ID]
             }, 404
-        
+
         seller = User.query.get(product.seller_id)
 
         amount = request.get_json()['amount']
         transaction_amount = product.cost * amount
-        if type(amount) != int:
-            return {
-                "errors": [Errors.NAN_PRODUCT_AMOUNT]
-            }
         if buyer.balance < transaction_amount:
             return {
                 "errors": [Errors.INSUFFICIENT_FUNDS]

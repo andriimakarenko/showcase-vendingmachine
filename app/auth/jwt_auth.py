@@ -80,3 +80,4 @@ def get_user_id_from_custom_token(token):
         return int(payload['user_id'])
     except Exception:
         logging.exception("Error getting user from decoded JWT token")
+        return None

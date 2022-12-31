@@ -1,8 +1,9 @@
+# pylint: disable=line-too-long
 import json
 from flask import url_for
+from sqlalchemy import func
 
 from app import errors, models
-from sqlalchemy import func
 
 def test_user_registration_valid(client, seed_database):
     """
@@ -155,7 +156,7 @@ def test_user_delete_unauthenticated(client, seed_database):
     assert errors.Errors.MISSING_TOKEN in response_object['errors']
     assert response.status_code == 403
 
-def test_user_patch_unauthorized(client, seed_database):
+def test_user_delete_unauthorized(client, seed_database):
     """
     GIVEN a Flask-backed API configured for testing
     WHEN the '/user' URL is gets a DELETE request for an existing user from another user
@@ -206,7 +207,7 @@ def test_user_deposit_NaN(client, seed_database):
 
     failed_as_expected = False
     try:
-        response = client.put(
+        client.put(
             url_for('api.user_deposit', amount='abracadabra'),
             headers={'Authorization': f'Bearer {buyer.token}'},
             follow_redirects=True

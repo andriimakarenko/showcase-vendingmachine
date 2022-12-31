@@ -1,7 +1,7 @@
 # coding=utf-8
 
 
-class Errors(object):
+class Errors():
     ACCESS_DENIED = "ACCESS_DENIED"
     INVALID_REQUEST = "INVALID_REQUEST"
     INVALID_TOKEN = "INVALID_TOKEN"
@@ -19,7 +19,7 @@ class Errors(object):
     NOT_ENOUGH_STOCK = "NOT_ENOUGH_STOCK"
 
 
-class ErrorsForHumans(object):
+class ErrorsForHumans():
     ACCESS_DENIED = "Access denied."
     INVALID_REQUEST = "Invalid request."
     INVALID_TOKEN = "Invalid token"

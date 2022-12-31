@@ -1,14 +1,14 @@
 import logging
-from flask import Flask
 from os import path
+from flask import Flask
 from sqlalchemy import select
 
-from . import models
-from . import keys
-from . import auth
 from config import Config
 from database import db, DB_NAME
 from app.rest import rest_blueprint
+from . import models
+from . import keys
+from . import auth
 
 def create_app():
     app = Flask(__name__)
@@ -18,7 +18,7 @@ def create_app():
     db.init_app(app)
 
     with app.app_context():
-            db.create_all()
+        db.create_all()
 
     app.register_blueprint(rest_blueprint)
 

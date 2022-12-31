@@ -1,10 +1,8 @@
 # The ORM models go gere
 
-
-from database import db
 from flask_login import UserMixin
 from sqlalchemy.orm import relationship
-
+from database import db
 
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -51,5 +49,5 @@ class Product(db.Model):
             f'<product_name: {self.product_name}, '
             f'amount_available: {self.amount_available}, '
             f'cost: {self.cost}, '
-            f'seller_id: {self.seller_id}>'    
+            f'seller_id: {self.seller_id}>'
         )

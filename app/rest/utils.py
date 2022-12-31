@@ -1,25 +1,24 @@
 import logging
+from functools import wraps
 from flask import request
-from flask_restx import Model, Namespace, fields
+from flask_restx import fields
 # from flask_restx import fields as flask_fields, Resource, ValidationError
-from app.keys import API_KEYS
 from wtforms import Form, fields as wtforms_fields
 # from wtforms.validators import Length as LengthValidator
-from functools import wraps
 
 from app.models import User
 from app.auth.jwt_auth import get_custom_auth_token_from_request, get_user_id_from_custom_token
-from app.errors import Errors, ErrorsForHumans
+from app.errors import Errors
 from database import db
 
 
 class AuthError(Exception):
     """Authentication error"""
-    pass
+    pass # pylint: disable=unnecessary-pass
 
 
 class APIError(Exception):
-    def __init__(self, message, errors, status_code=400, *args):
+    def __init__(self, message, errors, *args, status_code=400):
         args = (message,) + args
         super(APIError, self).__init__(*args)
         self.status_code = status_code
@@ -185,7 +184,7 @@ def make_model_from_form(api, form_class, name=None, overrides=None):
                     field.name,
                     type(field.unbound_field.field_class),
                 )
-                inner_field_type = fields.String,
+                inner_field_type = fields.String
             field_args.append(inner_field_type)
         model_fields[field.name] = field_type(*field_args, **field_kwargs)
     # Remove any fields that are explicitly set to None
@@ -216,7 +215,7 @@ def make_form_errors_model(api, form_class, model_name=None, remap=None):
     >>> })
     """
     if model_name is None:
-        model_name = "{0}Errors".format(form_class.__name__)
+        model_name = f"{form_class.__name__}Errors"
     if remap is None:
         remap = {}
     model_fields = {}
@@ -247,7 +246,7 @@ def vuild_model_from_db_model(api, model_class, model_name=None, overrides=None)
         property_type = property_map.get(field_type)
 
         if property_type is None:
-            logging.error(f"Unexpected db field type {field_type}")
+            logging.error("Unexpected db field type %s", field_type)
             property_type = fields.String
 
         # Ignore model fields that were explicitly specified in overrides.
@@ -274,4 +273,4 @@ def make_model(api, cls, name=None, overrides=None):
         return make_model_from_form(api, cls, name, overrides)
     if issubclass(cls, db.Model):
         return make_model_from_db_model(api, cls, name, overrides)
-    raise TypeError("Unexpected type: {0}".format(cls.__name__))
+    raise TypeError(f"Unexpected type: {cls.__name__}")

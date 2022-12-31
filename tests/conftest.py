@@ -1,10 +1,11 @@
 """This file is automatically used by pytest to discover global fixtures."""
+#pylint: disable=redefined-outer-name
 import pytest
-from werkzeug.security import generate_password_hash
+# from werkzeug.security import generate_password_hash
 
 from app import create_app
-from database import db as project_db
 from app.auth.jwt_auth import generate_custom_auth_token
+from database import db as project_db
 
 from tests.utils import UserFactory, RoleFactory
 
@@ -25,7 +26,7 @@ def seed_database(client):
     project_db.session.add(vendor_role)
     project_db.session.add(buyer_role)
     project_db.session.commit()
-    
+
     # After committing the models will now have ids set
 
     vendor1 = UserFactory.create(
@@ -53,7 +54,7 @@ def seed_database(client):
 
     for user in [vendor1, vendor2, buyer1, buyer2]:
         user.token = generate_custom_auth_token(user.id)
-    
+
     project_db.session.add_all([vendor1, vendor2, buyer1, buyer2])
     project_db.session.commit()
 
