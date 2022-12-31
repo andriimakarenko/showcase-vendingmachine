@@ -44,5 +44,6 @@ disable = [
   "broad-except",
   "bare-except",
   "invalid-name",
-  "trailing-comma-tuple",
+  "super-with-arguments",
+  "no-else-return",
 ]
