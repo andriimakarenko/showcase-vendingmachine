@@ -50,6 +50,6 @@ class Product(db.Model):
         return (
             f'<product_name: {self.product_name}, '
             f'amount_available: {self.amount_available}, '
-            f'cost: {self.cost}>'
+            f'cost: {self.cost}, '
             f'seller_id: {self.seller_id}>'    
         )
